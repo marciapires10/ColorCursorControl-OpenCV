@@ -11,6 +11,8 @@ from pynput.mouse import Button, Controller
 
 ##########################
 # Print Image Features
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 
 def printImageFeatures(image):
     if len(image.shape) == 2:
@@ -34,15 +36,15 @@ mouse = Controller()
 def detect_objects(img):
 
     # define range of blue color in HSV
-    lower_bound = np.array([110, 50, 50])
+    lower_bound = np.array([110, 100, 100])
     upper_bound = np.array([130, 255, 255])
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     blue_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
 
     # define range of green color in HSV
-    lower_bound = np.array([65, 60, 60])
-    upper_bound = np.array([80, 255, 255])
+    # lower_bound = np.array([65, 60, 60])
+    # upper_bound = np.array([80, 255, 255])
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     green_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
@@ -57,6 +59,8 @@ def open_close_operations(mask):
     return mask_close
 
 capture = cv2.VideoCapture(0)
+capture.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 384)
 
 while (True):
     ret, frame = capture.read()
@@ -75,7 +79,10 @@ while (True):
         cx = x+w/2
         cy = y+h/2
         
-        mouseLoc = (1000 - (cx * 1000 / 340), cy * 500 / 220)
+        cx = (SCREEN_WIDTH * cx / 640)
+        cy = (SCREEN_HEIGHT * cy / 370)
+
+        mouseLoc = (cx, cy)
         mouse.position = mouseLoc
 
         #mouse.press(Button.left)
