@@ -1,15 +1,13 @@
-# Aula_03_ex_04.py
-#
-# Sobel Operator
-#
-# Paulo Dias - 10/2019
+#  Márcia Pires (88747) e Tomás Martins (89286)
+# 
+#  Adapted from Paulo Dias - 10/2019
 
 
 import cv2
 import numpy as np
 import sys
 import cv2
-
+from pynput.mouse import Button, Controller
 
 ##########################
 # Print Image Features
@@ -27,10 +25,48 @@ def printImageFeatures(image):
     print("Number of elements:", image.size)
 
 
+mouse = Controller()
+
+## font for the major part of the code so far:
+## https://github.com/avimishh/camera_cursor_control/blob/master/mouse.py
+
+# detect (dark) blue objects
+def detect_objects(img):
+    # define range of blue color in HSV
+    lower_bound = np.array([110, 50, 50])
+    upper_bound = np.array([130, 255, 255])
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask_noised = cv2.inRange(hsv, lower_bound, upper_bound)
+
+    return open_close_operations(mask_noised)
+
+def open_close_operations(mask):
+    kernel_open = np.ones((5,5))
+    kernel_close = np.ones((20, 20))
+
+    mask_open = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
+    mask_close = cv2.morphologyEx(mask_open, cv2.MORPH_CLOSE, kernel_close)
+    return mask_close
 
 capture = cv2.VideoCapture(0)
+
 while (True):
     ret, frame = capture.read()
+    mask_obj_detected = detect_objects(frame)
+
+    conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    img = frame
+
+    if(len(conts) == 1):
+        x, y, w, h = cv2.boundingRect(conts[0])
+        cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+        cx = x+w/2
+        cy = y+h/2
+        
+        mouseLoc = (1000 - (cx * 1000 / 340), cy * 500 / 220)
+        mouse.position = mouseLoc
+
+
     cv2.imshow('video', frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
