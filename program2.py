@@ -14,6 +14,18 @@ from pynput.mouse import Button, Controller
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 
+# Colors
+GREEN_COLOR_LOWER = [65, 60, 60]
+GREEN_COLOR_UPPER = [80, 255, 255]
+BLUE_COLOR_LOWER = [110, 100, 100]
+BLUE_COLOR_UPPER = [130, 255, 255]
+YELLOW_COLOR_LOWER = [0, 153, 153]
+YELLOW_COLOR_UPPER = [153, 255, 255]
+ORANGE_COLOR_LOWER = [0, 109, 195]
+ORANGE_COLOR_UPPER = [17, 255, 255]
+RED_COLOR_LOWER = [175, 50, 20]
+RED_COLOR_UPPER = [5, 255, 255]
+
 def printImageFeatures(image):
     if len(image.shape) == 2:
         height, width = image.shape
@@ -32,8 +44,33 @@ mouse = Controller()
 ## font for the major part of the code so far:
 ## https://github.com/avimishh/camera_cursor_control/blob/master/mouse.py
 
+def detect_color(img, lower, upper):
+    # define range of color in HSV
+    lower_bound = np.array(lower)
+    upper_bound = np.array(upper)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    return open_close_operations(mask)
+
 # detect (dark) blue objects
 def detect_objects(img):
+    #  define range of red color in HSV
+    lower_bound = np.array([175, 50, 20])
+    upper_bound = np.array([5, 255, 255])
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    red_mask = cv2.inRange(hsv, lower_bound, upper_bound)
+
+    #  define range of orange color in HSV
+    lower_bound = np.array([0, 109, 195])
+    upper_bound = np.array([17, 255, 255])
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    orange_mask = cv2.inRange(hsv, lower_bound, upper_bound)
+
+    # define range of yellow color in HSV
+    lower_bound = np.array([0, 153, 153])
+    upper_bound = np.array([153, 255, 255])
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    yellow_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
     # define range of blue color in HSV
     lower_bound = np.array([110, 100, 100])
@@ -43,12 +80,13 @@ def detect_objects(img):
 
 
     # define range of green color in HSV
-    # lower_bound = np.array([65, 60, 60])
-    # upper_bound = np.array([80, 255, 255])
+    lower_bound = np.array([65, 60, 60])
+    upper_bound = np.array([80, 255, 255])
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     green_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
-    return open_close_operations(green_mask)
+    mask = green_mask + blue_mask + yellow_mask + orange_mask + red_mask
+    return open_close_operations(mask)
 
 def open_close_operations(mask):
     kernel_open = np.ones((5,5))
@@ -63,31 +101,63 @@ capture.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 384)
 
 while (True):
+
     ret, frame = capture.read()
     mask_obj_detected = detect_objects(frame)
-    cv2.imshow('mask', mask_obj_detected)
 
+    green_color_detected = detect_color(frame,GREEN_COLOR_LOWER, GREEN_COLOR_UPPER)
+    hasGreen = np.sum(green_color_detected)
+
+    blue_color_detected = detect_color(frame,BLUE_COLOR_LOWER, BLUE_COLOR_UPPER)
+    hasBlue = np.sum(blue_color_detected)
+
+    yellow_color_detected = detect_color(frame,YELLOW_COLOR_LOWER, YELLOW_COLOR_UPPER)
+    hasYellow = np.sum(yellow_color_detected)
+
+    orange_color_detected = detect_color(frame,ORANGE_COLOR_LOWER, ORANGE_COLOR_UPPER)
+    hasOrange = np.sum(orange_color_detected)
+
+    red_color_detected = detect_color(frame,RED_COLOR_LOWER, RED_COLOR_UPPER)
+    hasRed = np.sum(red_color_detected)
+
+    if hasRed > 0:
+        print("Has Red")
+
+    if hasGreen > 0 and hasOrange > 0:
+        mouse.press(Button.right)    
+    elif hasGreen > 0 and hasYellow > 0:
+        mouse.click(Button.right, 2)
+    elif hasGreen > 0:
+        mouse.click(Button.left, 2)
+    elif hasOrange > 0:
+        print("ORANGE")
+        mouse.scroll(0, -2)
+    elif hasYellow > 0:
+        print("YELLOW")
+        mouse.scroll(0, 2)
+    
+    cv2.imshow('mask', mask_obj_detected)
+    
     result = cv2.bitwise_and(frame, frame, mask=mask_obj_detected)
+
     cv2.imshow('bitwise', result)
 
     conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # print(conts)
     img = frame
 
     if(len(conts) == 1):
+        print(h)
         x, y, w, h = cv2.boundingRect(conts[0])
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
         cx = x+w/2
         cy = y+h/2
         
-        cx = (SCREEN_WIDTH * cx / 640)
-        cy = (SCREEN_HEIGHT * cy / 370)
+        cx = (SCREEN_WIDTH * cx / 630)
+        cy = (SCREEN_HEIGHT * cy / 450)
 
         mouseLoc = (cx, cy)
         mouse.position = mouseLoc
-
-        #mouse.press(Button.left)
-        #mouse.release(Button.left)
-
 
     cv2.imshow('video', frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
