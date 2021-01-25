@@ -23,8 +23,29 @@ YELLOW_COLOR_LOWER = [20, 173, 173]
 YELLOW_COLOR_UPPER = [90, 255, 255]
 ORANGE_COLOR_LOWER = [0, 109, 195]
 ORANGE_COLOR_UPPER = [17, 255, 255]
-
+choice = 100
+MENU = "-------------- APLICATION MENU --------------\n\t1 - Livestream your image.\n\t2 - Record your own video\n\t3 - Show video.\n\t4 - Exit program\n\t>"
 mouse_positions = []
+
+def recordVideo():
+    # Record video 
+    rec = cv2.VideoCapture(0)
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('result.avi', fourcc, 20.0, (640, 480))
+
+    while (True):
+        ret, frame = rec.read()
+
+        frame = cv2.flip(frame, 1)
+        out.write(frame)
+
+        cv2.imshow('Recording...', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    rec.release()
+    out.release()
+    cv2.destroyAllWindows()
 
 def resize_positions(_mouse_positions):
     return _mouse_positions[1:]
@@ -94,15 +115,28 @@ def open_close_operations(mask):
     mask_close = cv2.morphologyEx(mask_open, cv2.MORPH_CLOSE, kernel_close)
     return mask_close
 
+while(choice != "1" and choice != "3"):
+    choice = input(MENU)
+    if choice == "2":
+        recordVideo()
+    if choice == "4":
+        sys.exit()   
 
-capture = cv2.VideoCapture(0)
+if choice == "1":
+    capture = cv2.VideoCapture(0)
+else:
+    capture = cv2.VideoCapture("result.avi")
+
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 384)
 
 while (True):
 
     ret, frame = capture.read()
-    mask_obj_detected = detect_objects(frame)
+    try:
+        mask_obj_detected = detect_objects(frame)
+    except:
+        sys.exit()
 
     green_color_detected = detect_color(frame,GREEN_COLOR_LOWER, GREEN_COLOR_UPPER)
     hasGreen = np.sum(green_color_detected)
@@ -143,7 +177,6 @@ while (True):
 
     conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     blue_conts, h_2 = cv2.findContours(blue_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    # print(conts)
     if len(conts) > 0:
         for cont in conts:
             x, y, w, h = cv2.boundingRect(cont)
@@ -160,7 +193,6 @@ while (True):
 
         mouseLoc = (cx_2, cy_2)
         mouse.position = mouseLoc
-        print(mouse.position)
 
         mouse_positions.append((int(cx), int(cy)))
         if len(mouse_positions) > 100:
