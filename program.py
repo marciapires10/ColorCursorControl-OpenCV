@@ -185,14 +185,32 @@ while (True):
 
     conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     blue_conts, h_2 = cv2.findContours(blue_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    if len(conts) > 0:
-        for cont in conts:
+    green_conts, h_3 = cv2.findContours(green_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    yellow_conts, h_4 = cv2.findContours(yellow_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    orange_conts, h_5 = cv2.findContours(orange_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if len(green_conts) > 0:
+        for cont in green_conts:
             x, y, w, h = cv2.boundingRect(cont)
-            cv2.rectangle(frame, (x,y), (x+w, y+h), (0,0,255), 2)
+            cv2.rectangle(frame, (x,y), (x+w, y+h), (0,255,0), 2)
+            cv2.putText(frame, "Green", (x, y), cv2.FONT_HERSHEY_TRIPLEX, 1.0, (0,255,0))
+    
+    if len(yellow_conts) > 0:
+        for cont in yellow_conts:
+            x, y, w, h = cv2.boundingRect(cont)
+            cv2.rectangle(frame, (x,y), (x+w, y+h), (52,232,235), 2)
+            cv2.putText(frame, "Yellow", (x, y), cv2.FONT_HERSHEY_TRIPLEX, 1.0, (52,232,235))
+
+    if len(orange_conts) > 0:
+        for cont in orange_conts:
+            x, y, w, h = cv2.boundingRect(cont)
+            cv2.rectangle(frame, (x,y), (x+w, y+h), (52,161,235), 2)
+            cv2.putText(frame, "Orange", (x, y), cv2.FONT_HERSHEY_TRIPLEX, 1.0, (52,161,235))
 
     if(len(blue_conts) == 1):
         x, y, w, h_2 = cv2.boundingRect(blue_conts[0])
-        cv2.rectangle(frame, (x,y), (x+w, y+h_2), (0,0,255), 2)
+        cv2.rectangle(frame, (x,y), (x+w, y+h_2), (255,0,0), 2)
+        cv2.putText(frame, "Blue", (x, y), cv2.FONT_HERSHEY_TRIPLEX, 1.0, (255,0,0))
         cx = x+w/2
         cy = y+h_2/2
         
@@ -203,12 +221,12 @@ while (True):
         mouse.position = mouseLoc
 
         mouse_positions.append((int(cx), int(cy)))
-        if len(mouse_positions) > 100:
+        if len(mouse_positions) > 50:
             mouse_positions = resize_positions(mouse_positions)
     for i in range(1, len(mouse_positions)):
         if not mouse_positions[i-1] is None or not mouse_positions[i] is None:
             line_size = 5
-            cv2.line(frame, mouse_positions[i-1], mouse_positions[i], (0,0,255), line_size)
+            cv2.line(frame, mouse_positions[i-1], mouse_positions[i], (255,0,0), line_size)
 
     cv2.imshow('video', frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
