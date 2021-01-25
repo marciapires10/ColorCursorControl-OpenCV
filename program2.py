@@ -26,6 +26,11 @@ ORANGE_COLOR_UPPER = [17, 255, 255]
 RED_COLOR_LOWER = [175, 50, 20]
 RED_COLOR_UPPER = [5, 255, 255]
 
+mouse_positions = []
+
+def resize_positions(_mouse_positions):
+    return _mouse_positions[1:]
+
 def printImageFeatures(image):
     if len(image.shape) == 2:
         height, width = image.shape
@@ -96,6 +101,7 @@ def open_close_operations(mask):
     mask_close = cv2.morphologyEx(mask_open, cv2.MORPH_CLOSE, kernel_close)
     return mask_close
 
+
 capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 384)
@@ -128,12 +134,12 @@ while (True):
     #     mouse.press(Button.right)    
     # elif hasGreen > 0 and hasYellow > 0:
     #     mouse.click(Button.right, 2)
-    if hasGreen > 0:
-        print("GREEN")
-        mouse.click(Button.left, 2)
-    if hasOrange > 0:
-        print("ORANGE")
-        mouse.scroll(0, -2)
+    # if hasGreen > 0:
+    #     print("GREEN")
+    #     mouse.click(Button.left, 2)
+    # if hasOrange > 0:
+    #     print("ORANGE")
+    #     mouse.scroll(0, -2)
     # elif hasYellow > 0:
     #     print("YELLOW")
     #     mouse.scroll(0, 2)
@@ -155,11 +161,21 @@ while (True):
         cx = x+w/2
         cy = y+h_2/2
         
-        cx = (SCREEN_WIDTH * cx / 630)
-        cy = (SCREEN_HEIGHT * cy / 450)
+        cx_2 = (SCREEN_WIDTH * cx / 630)
+        cy_2 = (SCREEN_HEIGHT * cy / 450)
 
-        mouseLoc = (cx, cy)
+        mouseLoc = (cx_2, cy_2)
         mouse.position = mouseLoc
+        print(mouse.position)
+
+        mouse_positions.append((int(cx), int(cy)))
+        if len(mouse_positions) > 100:
+            mouse_positions = resize_positions(mouse_positions)
+    for i in range(1, len(mouse_positions)):
+        if not mouse_positions[i-1] is None or not mouse_positions[i] is None:
+            line_size = int(np.sqrt(64 / float(i + 1)) * 2.5)
+            line_size = 10
+            cv2.line(frame, mouse_positions[i-1], mouse_positions[i], (0,0,255), line_size)
 
     cv2.imshow('video', frame)
     if cv2.waitKey(1) & 0xFF == ord("q"):
