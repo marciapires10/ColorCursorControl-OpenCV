@@ -130,19 +130,19 @@ while (True):
         print("BLUE")
     if hasRed > 0:
         print("RED")
-    # if hasGreen > 0 and hasOrange > 0:
-    #     mouse.press(Button.right)    
-    # elif hasGreen > 0 and hasYellow > 0:
-    #     mouse.click(Button.right, 2)
-    # if hasGreen > 0:
-    #     print("GREEN")
-    #     mouse.click(Button.left, 2)
-    # if hasOrange > 0:
-    #     print("ORANGE")
-    #     mouse.scroll(0, -2)
-    # elif hasYellow > 0:
-    #     print("YELLOW")
-    #     mouse.scroll(0, 2)
+    if hasGreen > 0 and hasOrange > 0:
+        mouse.press(Button.right)    
+    elif hasGreen > 0 and hasYellow > 0:
+        mouse.click(Button.right, 2)
+    if hasGreen > 0:
+        print("GREEN")
+        mouse.click(Button.left, 2)
+    if hasOrange > 0:
+        print("ORANGE")
+        mouse.scroll(0, -2)
+    elif hasYellow > 0:
+        print("YELLOW")
+        mouse.scroll(0, 2)
     
     cv2.imshow('mask', mask_obj_detected)
     
