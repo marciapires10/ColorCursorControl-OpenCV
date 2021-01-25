@@ -154,10 +154,12 @@ while (True):
     blue_conts, h_2 = cv2.findContours(blue_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # print(conts)
     img = frame
-
-    if(len(blue_conts) == 1):
+    if len(conts) > 0:
         x, y, w, h = cv2.boundingRect(conts[0])
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+
+    if(len(blue_conts) == 1):
+        
 
         x, y, w, h_2 = cv2.boundingRect(blue_conts[0])
         cv2.rectangle(img, (x,y), (x+w, y+h_2), (0,0,255), 2)
