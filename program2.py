@@ -150,7 +150,7 @@ while (True):
     img = frame
 
     if(len(blue_conts) == 1):
-        x, y, w, h_2 = cv2.boundingRect(conts[0])
+        x, y, w, h_2 = cv2.boundingRect(blue_conts[0])
         cv2.rectangle(img, (x,y), (x+w, y+h_2), (0,0,255), 2)
         cx = x+w/2
         cy = y+h_2/2
