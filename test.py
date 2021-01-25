@@ -1,45 +1,43 @@
 import cv2
 import numpy as np
 
-def nothing(x):
-    pass
+def valueChanged(x):
+    print("Changed to : " + str(x))
 
-cap = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(0)
 
-cv2.namedWindow('Trackbars')
-cv2.createTrackbar('L - H', 'Trackbars', 0, 179, nothing)
-cv2.createTrackbar('L - S', 'Trackbars', 0, 255, nothing)
-cv2.createTrackbar('L - V', 'Trackbars', 0, 255, nothing)
-cv2.createTrackbar('U - H', 'Trackbars', 179, 179, nothing)
-cv2.createTrackbar('U - S', 'Trackbars', 255, 255, nothing)
-cv2.createTrackbar('U - V', 'Trackbars', 255, 255, nothing)
+cv2.namedWindow('Test your colors')
+cv2.createTrackbar('L - H', 'Test your colors', 0, 179, valueChanged)
+cv2.createTrackbar('L - S', 'Test your colors', 0, 255, valueChanged)
+cv2.createTrackbar('L - V', 'Test your colors', 0, 255, valueChanged)
+cv2.createTrackbar('U - H', 'Test your colors', 0, 179, valueChanged)
+cv2.createTrackbar('U - S', 'Test your colors', 0, 255, valueChanged)
+cv2.createTrackbar('U - V', 'Test your colors', 0, 255, valueChanged)
 
 while True:
-    _, frame = cap.read()
-    frame = cv2.flip(frame, 1)
+    ret, frame = capture.read()
     
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    l_h = cv2.getTrackbarPos('L - H', 'Trackbars')
-    l_s = cv2.getTrackbarPos('L - S', 'Trackbars')
-    l_v = cv2.getTrackbarPos('L - V', 'Trackbars')
-    u_h = cv2.getTrackbarPos('U - H', 'Trackbars')
-    u_s = cv2.getTrackbarPos('U - S', 'Trackbars')
-    u_v = cv2.getTrackbarPos('U - V', 'Trackbars')
+    lh = cv2.getTrackbarPos('L - H', 'Test your colors')
+    ls = cv2.getTrackbarPos('L - S', 'Test your colors')
+    lv = cv2.getTrackbarPos('L - V', 'Test your colors')
+    uh = cv2.getTrackbarPos('U - H', 'Test your colors')
+    us = cv2.getTrackbarPos('U - S', 'Test your colors')
+    uv = cv2.getTrackbarPos('U - V', 'Test your colors')
 
-    lower = np.array([l_h, l_s, l_v])
-    upper = np.array([u_h, u_s, u_v])
-    mask = cv2.inRange(hsv, lower, upper)
+    lower = (lh, ls, lv)
+    upper = (uh, us, uv)
+    mask = cv2.inRange(hsv, np.array(lower), np.array(upper))
 
     result = cv2.bitwise_and(frame, frame, mask=mask)
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('video', frame)
     cv2.imshow('mask', mask)
-    cv2.imshow('result', result)
+    cv2.imshow('bitwise', result)
 
-    key = cv2.waitKey(1)
-    if key == 27:
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
-cap.release()
+capture.release()
 cv2.destroyAllWindows()

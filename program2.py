@@ -16,15 +16,13 @@ SCREEN_HEIGHT = 1080
 
 # Colors
 GREEN_COLOR_LOWER = [65, 60, 60]
-GREEN_COLOR_UPPER = [80, 255, 255]
+GREEN_COLOR_UPPER = [84, 255, 255]
 BLUE_COLOR_LOWER = [110, 100, 100]
 BLUE_COLOR_UPPER = [130, 255, 255]
-YELLOW_COLOR_LOWER = [0, 153, 153]
-YELLOW_COLOR_UPPER = [153, 255, 255]
+YELLOW_COLOR_LOWER = [20, 173, 173]
+YELLOW_COLOR_UPPER = [90, 255, 255]
 ORANGE_COLOR_LOWER = [0, 109, 195]
 ORANGE_COLOR_UPPER = [17, 255, 255]
-RED_COLOR_LOWER = [175, 50, 20]
-RED_COLOR_UPPER = [5, 255, 255]
 
 mouse_positions = []
 
@@ -59,11 +57,6 @@ def detect_color(img, lower, upper):
 
 # detect (dark) blue objects
 def detect_objects(img):
-    #  define range of red color in HSV
-    lower_bound = np.array([175, 50, 20])
-    upper_bound = np.array([5, 255, 255])
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    red_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
     #  define range of orange color in HSV
     lower_bound = np.array([0, 109, 195])
@@ -90,7 +83,7 @@ def detect_objects(img):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     green_mask = cv2.inRange(hsv, lower_bound, upper_bound)
 
-    mask = green_mask + blue_mask + yellow_mask + orange_mask + red_mask
+    mask = green_mask + blue_mask + yellow_mask + orange_mask
     return open_close_operations(mask)
 
 def open_close_operations(mask):
@@ -123,26 +116,24 @@ while (True):
     orange_color_detected = detect_color(frame,ORANGE_COLOR_LOWER, ORANGE_COLOR_UPPER)
     hasOrange = np.sum(orange_color_detected)
 
-    red_color_detected = detect_color(frame,RED_COLOR_LOWER, RED_COLOR_UPPER)
-    hasRed = np.sum(red_color_detected)
 
     if hasBlue > 0:
         print("BLUE")
-    # if hasRed > 0:
-    #     print("RED")
-    # if hasGreen > 0 and hasOrange > 0:
-    #     mouse.press(Button.right)    
-    # elif hasGreen > 0 and hasYellow > 0:
-    #     mouse.click(Button.right, 2)
-    # if hasGreen > 0:
-    #     print("GREEN")
-    #     mouse.click(Button.left, 2)
-    # if hasOrange > 0:
-    #     print("ORANGE")
-    #     mouse.scroll(0, -2)
-    # elif hasYellow > 0:
-    #     print("YELLOW")
-    #     mouse.scroll(0, 2)
+    if hasGreen > 0 and hasOrange > 0:
+        print("GREEN and ORANGE")
+        mouse.press(Button.left)    
+    elif hasGreen > 0 and hasYellow > 0:
+        print("GREEN and YELLOW")
+        mouse.click(Button.right, 1)
+    elif hasGreen > 0:
+        print("GREEN")
+        mouse.click(Button.left, 1)
+    elif hasOrange > 0:
+        print("ORANGE")
+        mouse.scroll(0, -1)
+    elif hasYellow > 0:
+        print("YELLOW")
+        mouse.scroll(0, 1)
     
     cv2.imshow('mask', mask_obj_detected)
     
@@ -153,16 +144,14 @@ while (True):
     conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     blue_conts, h_2 = cv2.findContours(blue_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # print(conts)
-    img = frame
     if len(conts) > 0:
-        x, y, w, h = cv2.boundingRect(conts[0])
-        cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+        for cont in conts:
+            x, y, w, h = cv2.boundingRect(cont)
+            cv2.rectangle(frame, (x,y), (x+w, y+h), (0,0,255), 2)
 
     if(len(blue_conts) == 1):
-        
-
         x, y, w, h_2 = cv2.boundingRect(blue_conts[0])
-        cv2.rectangle(img, (x,y), (x+w, y+h_2), (0,0,255), 2)
+        cv2.rectangle(frame, (x,y), (x+w, y+h_2), (0,0,255), 2)
         cx = x+w/2
         cy = y+h_2/2
         
@@ -178,8 +167,7 @@ while (True):
             mouse_positions = resize_positions(mouse_positions)
     for i in range(1, len(mouse_positions)):
         if not mouse_positions[i-1] is None or not mouse_positions[i] is None:
-            line_size = int(np.sqrt(64 / float(i + 1)) * 2.5)
-            line_size = 10
+            line_size = 5
             cv2.line(frame, mouse_positions[i-1], mouse_positions[i], (0,0,255), line_size)
 
     cv2.imshow('video', frame)
