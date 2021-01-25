@@ -120,21 +120,23 @@ while (True):
     red_color_detected = detect_color(frame,RED_COLOR_LOWER, RED_COLOR_UPPER)
     hasRed = np.sum(red_color_detected)
 
+    if hasBlue > 0:
+        print("BLUE")
     if hasRed > 0:
-        print("Has Red")
-
-    if hasGreen > 0 and hasOrange > 0:
-        mouse.press(Button.right)    
-    elif hasGreen > 0 and hasYellow > 0:
-        mouse.click(Button.right, 2)
-    elif hasGreen > 0:
+        print("RED")
+    # if hasGreen > 0 and hasOrange > 0:
+    #     mouse.press(Button.right)    
+    # elif hasGreen > 0 and hasYellow > 0:
+    #     mouse.click(Button.right, 2)
+    if hasGreen > 0:
+        print("GREEN")
         mouse.click(Button.left, 2)
-    elif hasOrange > 0:
+    if hasOrange > 0:
         print("ORANGE")
         mouse.scroll(0, -2)
-    elif hasYellow > 0:
-        print("YELLOW")
-        mouse.scroll(0, 2)
+    # elif hasYellow > 0:
+    #     print("YELLOW")
+    #     mouse.scroll(0, 2)
     
     cv2.imshow('mask', mask_obj_detected)
     
@@ -143,15 +145,15 @@ while (True):
     cv2.imshow('bitwise', result)
 
     conts, h = cv2.findContours(mask_obj_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    blue_conts, h_2 = cv2.findContours(blue_color_detected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     # print(conts)
     img = frame
 
-    if(len(conts) == 1):
-        print(h)
-        x, y, w, h = cv2.boundingRect(conts[0])
-        cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+    if(len(blue_conts) == 1):
+        x, y, w, h_2 = cv2.boundingRect(conts[0])
+        cv2.rectangle(img, (x,y), (x+w, y+h_2), (0,0,255), 2)
         cx = x+w/2
-        cy = y+h/2
+        cy = y+h_2/2
         
         cx = (SCREEN_WIDTH * cx / 630)
         cy = (SCREEN_HEIGHT * cy / 450)
