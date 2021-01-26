@@ -66,8 +66,6 @@ def printImageFeatures(image):
 
 mouse = Controller()
 
-## font for the major part of the code so far:
-## https://github.com/avimishh/camera_cursor_control/blob/master/mouse.py
 
 def detect_color(img, lower, upper):
     # define range of color in HSV
@@ -77,7 +75,6 @@ def detect_color(img, lower, upper):
     mask = cv2.inRange(hsv, lower_bound, upper_bound)
     return clean_mask(mask)
 
-# detect (dark) blue objects
 def detect_objects(img):
 
     #  define range of orange color in HSV
@@ -97,7 +94,6 @@ def detect_objects(img):
     upper_bound = np.array([130, 255, 255])
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     blue_mask = cv2.inRange(hsv, lower_bound, upper_bound)
-
 
     # define range of green color in HSV
     lower_bound = np.array([65, 60, 60])
