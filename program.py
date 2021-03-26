@@ -24,7 +24,7 @@ ORANGE_COLOR_LOWER = [0, 109, 195]
 ORANGE_COLOR_UPPER = [17, 255, 255]
 choice = 100
 blur_choice = 100
-MENU = "-------------- APLICATION MENU --------------\n\t1 - Livestream your image\n\t2 - Record your own video\n\t3 - Show video\n\t4 - Calibrate your colors\n\t5 - Exit program\n\tNote: To close the windows in any of the options, you can press 'Q'.\n\t>"
+MENU = "-------------- APPLICATION MENU --------------\n\t1 - Livestream your image\n\t2 - Record your own video\n\t3 - Show video\n\t4 - Calibrate your colors\n\t5 - Exit program\n\tNote: To close the windows in any of the options, you can press 'Q'.\n\t>"
 BLUR_MENU = "\n\t Do you want to blur your image?\n\t1 - Yes\n\t2 - No\n\t>"
 mouse_positions = []
 
